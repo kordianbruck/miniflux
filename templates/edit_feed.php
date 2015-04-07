@@ -27,8 +27,13 @@
 
     <?= Helper\form_checkbox('cloak_referrer', t('Cloak the image referrer'), 1, isset($values['cloak_referrer']) ? $values['cloak_referrer'] : false) ?><br />
 
-    <?= Helper\form_checkbox('enabled', t('Activated'), 1, isset($values['enabled']) ? $values['enabled'] : false) ?>
+    <?= Helper\form_checkbox('enabled', t('Activated'), 1, isset($values['enabled']) ? $values['enabled'] : false) ?><br />
 
+    Tags: (<a href="#add-tag" data-action="add-tag">add</a>)
+    <div class="btn-group" id="tags">
+        <?= Helper\form_multi_select($tags,'id', 'title', function($e){return !empty($e['feed']);}) ?>
+    </div>
+    
     <div class="form-actions">
         <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
         <?= t('or') ?> <a href="?action=feeds"><?= t('cancel') ?></a>

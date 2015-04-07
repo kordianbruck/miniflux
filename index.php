@@ -10,7 +10,7 @@ require __DIR__.'/vendor/fguillot/picofarad/lib/PicoFarad/Router.php';
 use PicoFarad\Router;
 use PicoFarad\Response;
 
-Router\bootstrap(__DIR__.'/controllers', 'common', 'console', 'user', 'config', 'item', 'history', 'bookmark', 'feed');
+Router\bootstrap(__DIR__.'/controllers', 'common', 'console', 'user', 'config', 'item', 'history', 'bookmark', 'feed', 'tag');
 
 // Page not found
 Router\notfound(function() {

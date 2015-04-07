@@ -5,7 +5,24 @@ namespace Schema;
 use PDO;
 use Model\Config;
 
-const VERSION = 40;
+const VERSION = 41;
+
+function version_41(PDO $pdo){
+    $pdo->exec('
+        CREATE TABLE "tags" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT
+        )
+    ');
+    
+    $pdo->exec('
+        CREATE TABLE "feeds2tags" (
+            feed INTEGER  NOT NULL,
+            tag INTEGER NOT NULL,
+	    PRIMARY KEY(feed,tag)
+        )
+    ');
+}
 
 function version_40($pdo)
 {

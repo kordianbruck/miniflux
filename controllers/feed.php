@@ -24,7 +24,8 @@ Router\get_action('edit-feed', function() {
         'errors' => array(),
         'nb_unread_items' => Model\Item\count_by_status('unread'),
         'menu' => 'feeds',
-        'title' => t('Edit subscription')
+        'title' => t('Edit subscription'),
+        'tags' => Model\Tag\get_feed_tags($id)
     )));
 });
 
@@ -36,7 +37,7 @@ Router\post_action('edit-feed', function() {
 
     if ($valid) {
 
-        if (Model\Feed\update($values)) {
+        if (Model\Feed\update($values) && Model\Tag\update_feed_tags($values)) {
             Session\flash(t('Your subscription has been updated.'));
         }
         else {
@@ -51,7 +52,8 @@ Router\post_action('edit-feed', function() {
         'errors' => $errors,
         'nb_unread_items' => Model\Item\count_by_status('unread'),
         'menu' => 'feeds',
-        'title' => t('Edit subscription')
+        'title' => t('Edit subscription'),
+        'tags' => Model\Tag\get_feed_tags($id)
     )));
 });
 

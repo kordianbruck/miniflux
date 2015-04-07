@@ -90,13 +90,19 @@ Miniflux.Event = (function() {
                         case 'mark-feed-read':
                             Miniflux.Item.MarkFeedAsRead(e.target.getAttribute("data-feed-id"));
                             break;
+                        case 'toggle-tag':
+                            Miniflux.Feed.ToggleTag(e);
+                            break;
+                        case 'add-tag':
+                            Miniflux.Feed.AddTag(e);
+                            break;
                     }
                 }
             };
         },
-        ListenKeyboardEvents: function() {
+        ListenKeyboardEvents: function () {
 
-            document.onkeypress = function(e) {
+            document.onkeypress = function (e) {
 
                 if (isEventIgnored(e)) {
                     return;

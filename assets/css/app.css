@@ -308,7 +308,8 @@ a.btn {
 
 a.btn-red:hover,
 .btn-red:hover,
-.btn-red:focus {
+.btn-red:focus,
+.btn-red.active {
     color: #fff;
     background: #c53727;
 }
@@ -320,7 +321,8 @@ a.btn-red:hover,
 }
 
 .btn-blue:hover,
-.btn-blue:focus {
+.btn-blue:focus,
+.btn-blue.active  {
     border-color: #2f5bb7;
     background: #357ae8;
 }
