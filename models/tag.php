@@ -7,15 +7,9 @@ use PicoDb\Database;
 //Get all tags which exsist and are linked to this feed
 function get_feed_tags($feed)
 {
-    return Database::get('db')
-            ->table('tags')
-            ->join('feeds2tags', 'tag', 'id')
-            ->beginOr()
-            ->eq('feed',$feed)
-            ->isnull('feed')
-            ->closeOr()
-            ->findAll();
+    return Database::get('db')->execute('SELECT * FROM tags t LEFT JOIN feeds2tags f2t ON (f2t.tag=t.id AND f2t.feed=?)', array($feed))->fetchAll();
 }
+
 
 // Update feed tagging information
 function update_feed_tags(array $values)
