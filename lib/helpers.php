@@ -224,11 +224,11 @@ function form_select($name, array $options, $values = array(), array $errors = a
 }
 
 function form_multi_select(array $options, $id, $title, $check = null, $class = '')
-{   
+{
     $html='';
     foreach ($options as $value) {
         $html .= '<input type="hidden" name="tag[' . $value[$id].']" id="form-'.'tag-' . $value[$id].'" value="'.
-                (!empty($value['feed'])?escape($value['feed']):'').'" />';
+                (!empty($value[$id])?escape($value[$id]):'').'" />';
         $html .= '<button type="button" id="tag-' . escape($value[$id]) . '" data-action="toggle-tag" class="btn btn-blue ' .($check($value) ? 'active':''). '" data-value="' . escape($value[$id]) . '"';
         $html .= '>'.escape($value[$title]).'</button>';
     }
