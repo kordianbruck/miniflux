@@ -12,9 +12,9 @@ use PicoDb\Database;
 function get_all()
 {
     return Database::get('db')
-            ->hashtable('tags')
-            ->orderBy('title')
-            ->getAll('id','title');
+            ->hashtable('tag')
+            ->orderBy('name')
+            ->getAll('id','name');
 }
 
 /**
@@ -26,10 +26,10 @@ function get_all()
 function get_feed_tags($feed_id)
 {
     return Database::get('db')
-            ->hashtable('tags')
-            ->join('feeds2tags', 'tag', 'id')
-            ->eq('feed', $feed_id)
-            ->getAll('id','title');
+            ->hashtable('tag')
+            ->join('feed_tag', 'tag_id', 'id')
+            ->eq('feed_id', $feed_id)
+            ->getAll('id', 'name');
 }
 
 /**
@@ -41,8 +41,8 @@ function get_feed_tags($feed_id)
 function get_tag_id($name)
 {
     return Database::get('db')
-            ->table('tags')
-            ->eq('title', $name)
+            ->table('tag')
+            ->eq('name', $name)
             ->findOneColumn('id');
 }
 
@@ -57,12 +57,12 @@ function get_tag_id($name)
  */
 function create($name)
 {
-    $data = array('title' => $name);
+    $data = array('name' => $name);
 
     // create tag if missing
     if (get_tag_id($name) === false) {
        Database::get('db')
-                ->table('tags')
+                ->table('tag')
                 ->insert($data);
     }
 
@@ -80,10 +80,10 @@ function create($name)
 function add($feed_id, $tags)
 {
     foreach ($tags as $tag){
-        $data = array('feed' => $feed_id, 'tag' => $tag);
+        $data = array('feed_id' => $feed_id, 'tag_id' => $tag);
 
         $result = Database::get('db')
-                ->table('feeds2tags')
+                ->table('feed_tag')
                 ->insert($data);
 
         if ($result === false) {
@@ -104,9 +104,9 @@ function add($feed_id, $tags)
 function remove($feed_id, $tags)
 {
     return Database::get('db')
-            ->table('feeds2tags')
-            ->eq('feed', $feed_id)
-            ->in('tag', $tags)
+            ->table('feed_tag')
+            ->eq('feed_id', $feed_id)
+            ->in('tag_id', $tags)
             ->remove();
 }
 
@@ -116,14 +116,14 @@ function remove($feed_id, $tags)
 function purge_tags()
 {
     $tags = Database::get('db')
-                ->table('tags')
-                ->join('feeds2tags', 'tag', 'id')
-                ->isnull('feed')
+                ->table('tag')
+                ->join('feed_tag', 'tag_id', 'id')
+                ->isnull('feed_id')
                 ->findAllByColumn('id');
 
     if (!empty($tags)) {
         Database::get('db')
-            ->table('tags')
+            ->table('tag')
             ->in('id', $tags)
             ->remove();
     }
