@@ -25,7 +25,8 @@ Router\get_action('edit-feed', function() {
         'nb_unread_items' => Model\Item\count_by_status('unread'),
         'menu' => 'feeds',
         'title' => t('Edit subscription'),
-        'tags' => Model\Tag\get_feed_tags($id)
+        'tags' => Model\Tag\get_all(),
+        'feed_tags' => Model\Tag\get_feed_tags($id)
     )));
 });
 
@@ -53,7 +54,8 @@ Router\post_action('edit-feed', function() {
         'nb_unread_items' => Model\Item\count_by_status('unread'),
         'menu' => 'feeds',
         'title' => t('Edit subscription'),
-        'tags' => Model\Tag\get_feed_tags($id)
+        'tags' => Model\Tag\get_all(),
+        'feed_tags' => Model\Tag\get_feed_tags($id)
     )));
 });
 

@@ -64,32 +64,6 @@ Miniflux.Feed = (function() {
                     });
                 }
             }, 100);
-        },
-        ToggleTag: function (tag) {
-            var el = tag.srcElement, val = el.getAttribute('data-value');
-            if (el.className.indexOf('active') > -1) {
-                el.classList.remove('active');
-                document.getElementById('form-' + el.id).value = '';
-            } else {
-                el.classList.add('active');
-                document.getElementById('form-' + el.id).value = val;
-            }
-        },
-        AddTag: function (tag) {
-            var tagTitle = prompt("Please enter the title for the new tag", "News");
-
-            if (tagTitle) {
-                var request = new XMLHttpRequest(), params = 'title=' + tagTitle;
-                request.onload = function () {
-                    if(this.responseText){
-                        document.getElementById('tags').insertAdjacentHTML('beforeend', this.responseText);
-                    }
-                };
-
-                request.open("POST", "?action=tag-create", true);
-                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                request.send(params);
-            }
         }
     };
 })();
