@@ -29,11 +29,15 @@
 
     <?= Helper\form_checkbox('enabled', t('Activated'), 1, isset($values['enabled']) ? $values['enabled'] : false) ?><br />
 
-    Tags: (<a href="#add-tag" data-action="add-tag">add</a>)
-    <div class="btn-group" id="tags">
-        <?= Helper\form_multi_select($tags,'id', 'title', function($e){return !empty($e['feed']);}) ?>
+    <?= Helper\form_label(t('Tags'), 'tags'); ?>
+
+    <div id="taglist">
+        <?= Helper\form_text('create_tag', array(), array(), array('placeholder="'.t('add a new tag').'"')) ?>
+        <?php foreach ($tags as $tag_id => $tag_title): ?>
+            <?= Helper\form_checkbox('tags[]', $tag_title, $tag_id, isset($feed_tags[$tag_id]), 'btn') ?>
+        <?php endforeach ?>
     </div>
-    
+
     <div class="form-actions">
         <button type="submit" class="btn btn-blue"><?= t('Save') ?></button>
         <?= t('or') ?> <a href="?action=feeds"><?= t('cancel') ?></a>
