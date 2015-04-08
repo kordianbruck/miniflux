@@ -7,19 +7,21 @@ use Model\Config;
 
 const VERSION = 41;
 
-function version_41(PDO $pdo){
+function version_41($pdo)
+{
     $pdo->exec('
-        CREATE TABLE "tags" (
+        CREATE TABLE "tag" (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT
+            name TEXT
         )
     ');
-    
+
     $pdo->exec('
-        CREATE TABLE "feeds2tags" (
-            feed INTEGER  NOT NULL,
-            tag INTEGER NOT NULL,
-	    PRIMARY KEY(feed,tag)
+        CREATE TABLE "feed_tag" (
+            feed_id INTEGER  NOT NULL,
+            tag_id INTEGER NOT NULL,
+            PRIMARY KEY(feed_id, tag_id)
+            FOREIGN KEY(feed_id) REFERENCES feeds(id) ON DELETE CASCADE
         )
     ');
 }
