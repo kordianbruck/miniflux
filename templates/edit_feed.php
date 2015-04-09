@@ -32,9 +32,9 @@
     <?= Helper\form_label(t('Tags'), 'tags'); ?>
 
     <div id="taglist">
-        <?= Helper\form_text('create_tag', array(), array(), array('placeholder="'.t('add a new tag').'"')) ?>
-        <?php foreach ($tags as $tag_id => $tag_title): ?>
-            <?= Helper\form_checkbox('tags[]', $tag_title, $tag_id, isset($feed_tags[$tag_id]), 'btn') ?>
+        <?= Helper\form_text('create_tag', $values, array(), array('placeholder="'.t('add a new tag').'"')) ?>
+        <?php foreach ($tags as $tag_id => $tag_name): ?>
+            <?= Helper\form_checkbox('feed_tag_ids[]', $tag_name, $tag_id, in_array($tag_id, $values['feed_tag_ids']), 'btn') ?>
         <?php endforeach ?>
     </div>
 

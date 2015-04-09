@@ -20,16 +20,16 @@ function get_all()
 /**
  * Get all tags assigned to feed
  *
- * @param integer $feed_id ID of the feed
+ * @param integer $feed_id id of the feed
  * @return array
  */
-function get_feed_tags($feed_id)
+function get_feed_tag_ids($feed_id)
 {
     return Database::get('db')
-            ->hashtable('tag')
+            ->table('tag')
             ->join('feed_tag', 'tag_id', 'id')
             ->eq('feed_id', $feed_id)
-            ->getAll('id', 'name');
+            ->findAllByColumn('id');
 }
 
 /**
@@ -59,15 +59,19 @@ function create($name)
 {
     $data = array('name' => $name);
 
+    // check if the tag already exists
+    $tag_id = get_tag_id($name);
+
     // create tag if missing
-    if (get_tag_id($name) === false) {
+    if ($tag_id === false) {
        Database::get('db')
                 ->table('tag')
                 ->insert($data);
+
+        $tag_id = get_tag_id($name);
     }
 
-    // return the id of the created tag
-    return get_tag_id($name);
+    return $tag_id;
 }
 
 /**
@@ -75,7 +79,7 @@ function create($name)
  *
  * @param integer $feed_id feed id
  * @param array $tags array of tag ids
- * @return boolean
+ * @return boolean true on success, false on error
  */
 function add($feed_id, $tags)
 {
@@ -99,7 +103,7 @@ function add($feed_id, $tags)
  *
  * @param integer $feed_id id of the feed
  * @param array $tags array of tag ids
- * @return boolean
+ * @return boolean true on success, false on error
  */
 function remove($feed_id, $tags)
 {
@@ -121,7 +125,7 @@ function purge_tags()
                 ->isnull('feed_id')
                 ->findAllByColumn('id');
 
-    if (!empty($tags)) {
+    if (! empty($tags)) {
         Database::get('db')
             ->table('tag')
             ->in('id', $tags)
@@ -132,39 +136,34 @@ function purge_tags()
 /**
  * Update feed tagging information
  *
- * @param array $values
+ * @param integer $feed_id id of the feed to update
+ * @param array $tag_ids valid tags ids for feed
+ * @param string $create_tag tag to create and assign to feed
  * @return boolean
  */
-function update_feed_tags(array $values)
+function update_feed_tags($feed_id, $tag_ids, $create_tag = '')
 {
-    $tags = array();
-
-    if (isset($values['tags'])) {
-        $tags = $values['tags'];
-    }
-
-    //create a new tag
-    if (isset($values['create_tag']) && $values['create_tag'] !== '') {
-        $id = create($values['create_tag']);
+    if ($create_tag !== '') {
+        $id = create($create_tag);
 
         if ($id === false) {
             return false;
         }
 
-        $tags[] = $id;
+        $tag_ids[] = $id;
     }
 
-    $assigned = array_keys(get_feed_tags($values['id']));
-    $superfluous = array_diff($assigned, $tags);
-    $missing = array_diff($tags, $assigned);
+    $assigned = get_feed_tag_ids($feed_id);
+    $superfluous = array_diff($assigned, $tag_ids);
+    $missing = array_diff($tag_ids, $assigned);
 
     // remove no longer assigned tags from feed
-    if (! empty($superfluous) && ! remove($values['id'], $superfluous)) {
+    if (! empty($superfluous) && ! remove($feed_id, $superfluous)) {
         return false;
     }
 
     // add requested tags to feed
-    if (! empty($missing) && ! add($values['id'], $missing)) {
+    if (! empty($missing) && ! add($feed_id, $missing)) {
         return false;
     }
 

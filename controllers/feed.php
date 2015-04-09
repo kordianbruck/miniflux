@@ -19,14 +19,18 @@ Router\get_action('edit-feed', function() {
 
     $id = Request\int_param('feed_id');
 
+    $values = Model\Feed\get($id);
+    $values += array(
+        'feed_tag_ids' => Model\Tag\get_feed_tag_ids($id)
+    );
+
     Response\html(Template\layout('edit_feed', array(
-        'values' => Model\Feed\get($id),
+        'values' => $values,
         'errors' => array(),
         'nb_unread_items' => Model\Item\count_by_status('unread'),
-        'menu' => 'feeds',
-        'title' => t('Edit subscription'),
         'tags' => Model\Tag\get_all(),
-        'feed_tags' => Model\Tag\get_feed_tags($id)
+        'menu' => 'feeds',
+        'title' => t('Edit subscription')
     )));
 });
 
@@ -34,11 +38,16 @@ Router\get_action('edit-feed', function() {
 Router\post_action('edit-feed', function() {
 
     $values = Request\values();
+    $values += array(
+        'feed_tag_ids' => array(),
+        'create_tag' => ''
+    );
+
     list($valid, $errors) = Model\Feed\validate_modification($values);
 
     if ($valid) {
 
-        if (Model\Feed\update($values) && Model\Tag\update_feed_tags($values)) {
+        if (Model\Feed\update($values)) {
             Session\flash(t('Your subscription has been updated.'));
         }
         else {
@@ -52,10 +61,9 @@ Router\post_action('edit-feed', function() {
         'values' => $values,
         'errors' => $errors,
         'nb_unread_items' => Model\Item\count_by_status('unread'),
-        'menu' => 'feeds',
-        'title' => t('Edit subscription'),
         'tags' => Model\Tag\get_all(),
-        'feed_tags' => Model\Tag\get_feed_tags($id)
+        'menu' => 'feeds',
+        'title' => t('Edit subscription')
     )));
 });
 
@@ -133,12 +141,19 @@ Router\get_action('feeds', function() {
 // Display form to add one feed
 Router\get_action('add', function() {
 
-    $values = array('download_content' => 0, 'rtl' => 0, 'cloak_referrer' => 0);
+    $values = array(
+        'download_content' => 0,
+        'rtl' => 0,
+        'cloak_referrer' => 0,
+        'create_tag' => '',
+        'feed_tag_ids' => array()
+    );
 
     Response\html(Template\layout('add', array(
         'values' => $values + array('csrf' => Model\Config\generate_csrf()),
         'errors' => array(),
         'nb_unread_items' => Model\Item\count_by_status('unread'),
+        'tags' => Model\Tag\get_all(),
         'menu' => 'feeds',
         'title' => t('New subscription')
     )));
@@ -162,10 +177,24 @@ Router\action('subscribe', function() {
         }
     }
 
-    $values += array('url' => trim($url), 'download_content' => 0, 'rtl' => 0, 'cloak_referrer' => 0);
+    $values += array(
+        'url' => trim($url),
+        'download_content' => 0,
+        'rtl' => 0,
+        'cloak_referrer' => 0,
+        'create_tag' => '',
+        'feed_tag_ids' => array()
+    );
 
     try {
-        $feed_id = Model\Feed\create($values['url'], $values['download_content'], $values['rtl'], $values['cloak_referrer']);
+        $feed_id = Model\Feed\create(
+            $values['url'],
+            $values['download_content'],
+            $values['rtl'],
+            $values['cloak_referrer'],
+            $values['feed_tag_ids'],
+            $values['create_tag']
+        );
     }
     catch (UnexpectedValueException $e) {
         $error_message = t('This subscription already exists.');
@@ -212,6 +241,7 @@ Router\action('subscribe', function() {
     Response\html(Template\layout('add', array(
         'values' => $values + array('csrf' => Model\Config\generate_csrf()),
         'nb_unread_items' => Model\Item\count_by_status('unread'),
+        'tags' => Model\Tag\get_all(),
         'menu' => 'feeds',
         'title' => t('Subscriptions')
     )));

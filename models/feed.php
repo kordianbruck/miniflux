@@ -5,6 +5,7 @@ namespace Model\Feed;
 use UnexpectedValueException;
 use Model\Config;
 use Model\Item;
+use Model\Tag;
 use SimpleValidator\Validator;
 use SimpleValidator\Validators;
 use PicoDb\Database;
@@ -93,7 +94,10 @@ function get_all_favicons()
 // Update feed information
 function update(array $values)
 {
-    return Database::get('db')
+    // TODO: does it work?
+    Database::get('db')->startTransaction();
+
+    $result = Database::get('db')
             ->table('feeds')
             ->eq('id', $values['id'])
             ->save(array(
@@ -105,6 +109,17 @@ function update(array $values)
                 'download_content' => empty($values['download_content']) ? 0 : $values['download_content'],
                 'cloak_referrer' => empty($values['cloak_referrer']) ? 0 : $values['cloak_referrer'],
             ));
+
+    if ($result) {
+        if (! Tag\update_feed_tags($values['id'], $values['feed_tag_ids'], $values['create_tag'])) {
+            Database::get('db')->cancelTransaction();
+            $result = false;
+        }
+    }
+
+    Database::get('db')->closeTransaction();
+
+    return $result;
 }
 
 // Export all feeds
@@ -150,7 +165,7 @@ function import_opml($content)
 }
 
 // Add a new feed from an URL
-function create($url, $enable_grabber = false, $force_rtl = false, $cloak_referrer = false)
+function create($url, $enable_grabber = false, $force_rtl = false, $cloak_referrer = false, $tag_ids = array(), $create_tag = '')
 {
     $feed_id = false;
 
@@ -194,6 +209,7 @@ function create($url, $enable_grabber = false, $force_rtl = false, $cloak_referr
     if ($result) {
         $feed_id = $db->getConnection()->getLastId();
 
+        Tag\update_feed_tags($feed_id, $tag_ids, $create_tag);
         Item\update_all($feed_id, $feed->getItems());
         fetch_favicon($feed_id, $feed->getSiteUrl(), $feed->getIcon());
     }
