@@ -243,6 +243,30 @@ textarea.form-error {
     display: none;
 }
 
+/* Feed tag buttons */
+#taglist span {
+    float: left;
+    opacity: 0.4;
+    min-width: 4em;
+    margin-right: 6px;
+    overflow: auto;
+    text-align: center;
+}
+
+#taglist input[type="text"] {
+    width: 150px;
+}
+
+#taglist input[type="checkbox"] + span, #taglist input[type="text"] {
+    padding: 4px;
+    margin-top: 6px;
+    margin-bottom: 0px;
+}
+
+#taglist input[type="checkbox"]:checked + span {
+    opacity: 1;
+}
+
 /* alerts */
 .alert, .panel {
     padding: 8px 35px 8px 14px;
@@ -283,7 +307,7 @@ textarea.form-error {
 }
 
 /* buttons */
-.btn {
+.btn, #taglist span {
     display: inline-block;
     color: #333;
     border: 1px solid #ccc;
