@@ -241,11 +241,6 @@ function form_radio($name, $label, $value, $checked = false, $class = '')
 
 function form_checkbox($name, $label, $value, $checked = false, $class = '')
 {
-    return '<label><input type="checkbox" name="'.$name.'" class="'.$class.'" value="'.escape($value).'" '.($checked ? 'checked="checked"' : '').'>&nbsp;'.escape($label).'</label>';
-}
-
-function form_tag($name, $label, $value, $checked = false, $class = '')
-{
     return '<label><input type="checkbox" name="'.$name.'" class="'.$class.'" value="'.escape($value).'" '.($checked ? 'checked="checked"' : '').'><span>'.escape($label).'</span></label>';
 }
 
