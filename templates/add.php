@@ -28,9 +28,7 @@
     <div id="taglist">
         <?= Helper\form_text('create_tag', $values, array(), array('placeholder="'.t('add a new tag').'"')) ?>
         <?php foreach ($tags as $tag_id => $tag_name): ?>
-            <div class="tag">
-                <?= Helper\form_tag('feed_tag_ids[]', $tag_name, $tag_id, in_array($tag_id, $values['feed_tag_ids']), 'btn') ?>
-            </div>
+            <?= Helper\form_checkbox('feed_tag_ids[]', $tag_name, $tag_id, in_array($tag_id, $values['feed_tag_ids']), 'btn') ?>
         <?php endforeach ?>
     </div>
 
