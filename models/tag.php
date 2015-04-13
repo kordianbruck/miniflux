@@ -12,9 +12,9 @@ use PicoDb\Database;
 function get_all()
 {
     return Database::get('db')
-            ->hashtable('tag')
+            ->table('tag')
             ->orderBy('name')
-            ->getAll('id','name');
+            ->findAll('id','name');
 }
 
 /**
@@ -57,7 +57,8 @@ function get_tag_id($name)
  */
 function create($name)
 {
-    $data = array('name' => $name);
+    $colors = array('red', 'green', 'blue');
+    $data = array('name' => $name, 'color'=> $colors[array_rand($colors)]);
 
     // check if the tag already exists
     $tag_id = get_tag_id($name);

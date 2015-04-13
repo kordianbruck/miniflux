@@ -244,9 +244,9 @@ function form_checkbox($name, $label, $value, $checked = false, $class = '')
     return '<label><input type="checkbox" name="'.$name.'" class="'.$class.'" value="'.escape($value).'" '.($checked ? 'checked="checked"' : '').'>&nbsp;'.escape($label).'</label>';
 }
 
-function form_tag($name, $label, $value, $checked = false, $class = '')
+function form_tag($name, $tag, $checked = false, $class = '')
 {
-    return '<label><input type="checkbox" name="'.$name.'" class="'.$class.'" value="'.escape($value).'" '.($checked ? 'checked="checked"' : '').'><span>'.escape($label).'</span></label>';
+    return '<label><input type="checkbox" name="'.$name.'" class="'.$class.'" value="'.escape($tag['id']).'" '.($checked ? 'checked="checked"' : '').'><span class="'.escape($tag['color']).'">'.escape($tag['name']).'</span></label>';
 }
 
 function form_label($label, $name, $class = '')
