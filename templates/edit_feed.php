@@ -33,9 +33,9 @@
 
     <div id="taglist">
         <?= Helper\form_text('create_tag', $values, array(), array('placeholder="'.t('add a new tag').'"')) ?>
-        <?php foreach ($tags as $tag): ?>
+        <?php foreach ($tags as $tag_id => $tag_name): ?>
             <div class="tag">
-                <?= Helper\form_tag('feed_tag_ids[]', $tag, in_array($tag['id'], $values['feed_tag_ids'])) ?>
+                <?= Helper\form_tag('feed_tag_ids[]', $tag_name, $tag_id, in_array($tag_id, $values['feed_tag_ids'])) ?>
             </div>
         <?php endforeach ?>
     </div>

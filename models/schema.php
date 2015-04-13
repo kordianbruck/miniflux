@@ -12,8 +12,7 @@ function version_41($pdo)
     $pdo->exec('
         CREATE TABLE "tag" (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            color TEXT
+            name TEXT
         )
     ');
 
