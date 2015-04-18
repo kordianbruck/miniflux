@@ -3,6 +3,7 @@
 require '../common.php';
 
 use Model\Feed;
+use Model\Tag;
 use PicoDb\Database;
 
 // Route handler
@@ -57,24 +58,16 @@ route('groups', function() {
     $response = auth();
 
     if ($response['auth']) {
+        $response['groups'] = Tag\get_all();
+        $response['feeds_groups'] = array();
+        $tag_map = Tag\get_map();
 
-        $feed_ids = Database::get('db')
-                        ->table('feeds')
-                        ->findAllByColumn('id');
-
-        $response['groups'] = array(
-            array(
-                'id' => 1,
-                'title' => t('All'),
-            )
-        );
-
-        $response['feeds_groups'] = array(
-            array(
-                'group_id' => 1,
-                'feed_ids' => implode(',', $feed_ids),
-            )
-        );
+        foreach ($tag_map as $tag_id => $feed_ids) {
+            $response['feeds_groups'][] = array(
+                'group_id' => $tag_id,
+                'feed_ids' => implode(',', $feed_ids)
+            );
+        }
     }
 
     response($response);
@@ -86,11 +79,10 @@ route('feeds', function() {
     $response = auth();
 
     if ($response['auth']) {
-
         $response['feeds'] = array();
-        $feeds = Feed\get_all();
-        $feed_ids = array();
+        $response['feeds_groups'] = array();
 
+        $feeds = Feed\get_all();
         foreach ($feeds as $feed) {
             $response['feeds'][] = array(
                 'id' => (int) $feed['id'],
@@ -101,16 +93,15 @@ route('feeds', function() {
                 'is_spark' => 0,
                 'last_updated_on_time' => $feed['last_checked'] ?: time(),
             );
-
-            $feed_ids[] = $feed['id'];
         }
 
-        $response['feeds_groups'] = array(
-            array(
-                'group_id' => 1,
-                'feed_ids' => implode(',', $feed_ids),
-            )
-        );
+        $tag_map = Tag\get_map();
+        foreach ($tag_map as $tag_id => $feed_ids) {
+            $response['feeds_groups'][] = array(
+                'group_id' => $tag_id,
+                'feed_ids' => implode(',', $feed_ids)
+            );
+        }
     }
 
     response($response);

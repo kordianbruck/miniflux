@@ -12,7 +12,7 @@ function version_41($pdo)
     $pdo->exec('
         CREATE TABLE "tag" (
             id INTEGER PRIMARY KEY,
-            name TEXT
+            title TEXT
         )
     ');
 

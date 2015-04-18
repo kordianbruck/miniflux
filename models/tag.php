@@ -11,10 +11,41 @@ use PicoDb\Database;
  */
 function get_all()
 {
+    // TODO: Who is responsible for sorting the data in MVC?
     return Database::get('db')
-            ->hashtable('tag')
-            ->orderBy('name')
-            ->getAll('id','name');
+            ->table('tag')
+            ->orderBy('title')
+            ->findAll();
+}
+
+/**
+ * Get assoc array of tag ids with assigned feeds ids
+ *
+ * @return array
+ */
+function get_map()
+{
+    $result = Database::get('db')
+            ->table('feed_tag')
+            ->findAll();
+
+    // TODO: add PDO::FETCH_COLUMN|PDO::FETCH_GROUP to picodb and use it instead
+    // of the following lines
+    $map = array();
+
+    foreach ($result as $row) {
+        $tag_id = $row['tag_id'];
+        $feed_id = $row['feed_id'];
+
+        if (isset($map[$tag_id])) {
+            $map[$tag_id][] = $feed_id;
+        }
+        else {
+            $map[$tag_id] = array($feed_id);
+        }
+    }
+
+    return $map;
 }
 
 /**
@@ -35,14 +66,14 @@ function get_feed_tag_ids($feed_id)
 /**
  * Get the id of tag
  *
- * @param string $name tag name
+ * @param string $title tag name
  * @return mixed tag id or false if not found
  */
-function get_tag_id($name)
+function get_tag_id($title)
 {
     return Database::get('db')
             ->table('tag')
-            ->eq('name', $name)
+            ->eq('title', $title)
             ->findOneColumn('id');
 }
 
@@ -52,15 +83,15 @@ function get_tag_id($name)
  * Returns either the id of the new tag or the id of an existing tag with the
  * same name
  *
- * @param string $name tag name
+ * @param string $title tag name
  * @return mixed id of the created tag or false on error
  */
-function create($name)
+function create($title)
 {
-    $data = array('name' => $name);
+    $data = array('title' => $title);
 
     // check if the tag already exists
-    $tag_id = get_tag_id($name);
+    $tag_id = get_tag_id($title);
 
     // create tag if missing
     if ($tag_id === false) {
@@ -68,7 +99,7 @@ function create($name)
                 ->table('tag')
                 ->insert($data);
 
-        $tag_id = get_tag_id($name);
+        $tag_id = get_tag_id($title);
     }
 
     return $tag_id;
