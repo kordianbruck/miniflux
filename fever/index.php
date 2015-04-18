@@ -291,11 +291,19 @@ route('write_groups', function() {
     $response = auth();
 
     if ($response['auth']) {
-
-        Database::get('db')
-            ->table('items')
-            ->lte('updated', $_POST['before'])
-            ->update(array('status' => $_POST['as'] === 'read' ? 'read' : 'unread'));
+        if ($_POST['id'] > 0) {
+            Database::get('db')
+                ->table('items')
+                ->in('feed_id', Model\Tag\get_feeds_by_tag($_POST['id']))
+                ->lte('updated', $_POST['before'])
+                ->update(array('status' => 'read'));
+        }
+        else {
+            Database::get('db')
+                ->table('items')
+                ->lte('updated', $_POST['before'])
+                ->update(array('status' => 'read'));
+        }
     }
 
     response($response);
