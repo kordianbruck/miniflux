@@ -109,7 +109,7 @@ $server->register('item.bookmark.delete', function ($item_id) {
 // Get all unread items
 $server->register('item.list_unread', function ($offset = null, $limit = null) {
 
-    return Model\Item\get_all('unread', $offset, $limit);
+    return Model\Item\get_all_by_status('unread', $offset, $limit);
 });
 
 // Count all unread items
@@ -121,7 +121,7 @@ $server->register('item.count_unread', function () {
 // Get all read items
 $server->register('item.list_read', function ($offset = null, $limit = null) {
 
-    return Model\Item\get_all('read', $offset, $limit);
+    return Model\Item\get_all_by_status('read', $offset, $limit);
 });
 
 // Count all read items
@@ -175,13 +175,13 @@ $server->register('item.mark_all_as_read', function() {
 // Get all items with the content
 $server->register('item.get_all', function() {
 
-    return Model\Item\get_everything();
+    return Model\Item\get_all();
 });
 
 // Get all items since a date
 $server->register('item.get_all_since', function($timestamp) {
 
-    return Model\Item\get_everything_since($timestamp);
+    return Model\Item\get_all_since($timestamp);
 });
 
 // Get all items id and status
