@@ -39,6 +39,10 @@ Router\post_action('edit-feed', function() {
 
     $values = Request\values();
     $values += array(
+        'enabled' => 0,
+        'download_content' => 0,
+        'rtl' => 0,
+        'cloak_referrer' => 0,
         'feed_tag_ids' => array(),
         'create_tag' => ''
     );
@@ -46,15 +50,13 @@ Router\post_action('edit-feed', function() {
     list($valid, $errors) = Model\Feed\validate_modification($values);
 
     if ($valid) {
-
         if (Model\Feed\update($values)) {
             Session\flash(t('Your subscription has been updated.'));
+            Response\redirect('?action=feeds');
         }
         else {
             Session\flash_error(t('Unable to edit your subscription.'));
         }
-
-        Response\redirect('?action=feeds');
     }
 
     Response\html(Template\layout('edit_feed', array(
