@@ -15,8 +15,12 @@ Router\get_action('unread', function() {
     $order = Request\param('order', 'updated');
     $direction = Request\param('direction', Model\Config\get('items_sorting_direction'));
     $offset = Request\int_param('offset', 0);
-    $items = Model\Item\get_all_by_status('unread', $offset, Model\Config\get('items_per_page'), $order, $direction);
+    $feed_id = Request\param('feed_id');
+    $items = Model\Item\get_by_status('unread', $feed_id, $offset, Model\Config\get('items_per_page'), $order, $direction);
+
+    // TODO: What should be done if a feed or group has no more unread items
     $nb_items = Model\Item\count_by_status('unread');
+    $nb_unread_items = Model\Item\count_by_status('unread');
 
     if ($nb_items === 0) {
 
@@ -32,7 +36,7 @@ Router\get_action('unread', function() {
         'display_mode' => Model\Config\get('items_display_mode'),
         'items' => $items,
         'nb_items' => $nb_items,
-        'nb_unread_items' => $nb_items,
+        'nb_unread_items' => $nb_unread_items,
         'offset' => $offset,
         'items_per_page' => Model\Config\get('items_per_page'),
         'title' => 'Miniflux ('.$nb_items.')',

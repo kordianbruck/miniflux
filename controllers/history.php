@@ -11,8 +11,10 @@ Router\get_action('history', function() {
 
     $offset = Request\int_param('offset', 0);
     $nb_items = Model\Item\count_by_status('read');
-    $items = Model\Item\get_all_by_status(
+    $feed_id = Request\param('feed_id');
+    $items = Model\Item\get_by_status(
         'read',
+        $feed_id,
         $offset,
         Model\Config\get('items_per_page'),
         'updated',

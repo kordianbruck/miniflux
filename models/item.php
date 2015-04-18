@@ -89,10 +89,10 @@ function get_all_status()
         ->getAll('id', 'status');
 }
 
-// Get all items by status
-function get_all_by_status($status, $offset = null, $limit = null, $order_column = 'updated', $order_direction = 'desc')
+// Get items by status
+function get_by_status($status, $feed_id = null, $offset = null, $limit = null, $order_column = 'updated', $order_direction = 'desc')
 {
-    return Database::get('db')
+    $db = Database::get('db')
         ->table('items')
         ->columns(
             'items.id',
@@ -114,8 +114,13 @@ function get_all_by_status($status, $offset = null, $limit = null, $order_column
         ->eq('status', $status)
         ->orderBy($order_column, $order_direction)
         ->offset($offset)
-        ->limit($limit)
-        ->findAll();
+        ->limit($limit);
+
+    if ($feed_id !== null) {
+        $db->in('feed_id', explode(',', $feed_id));
+    }
+
+    return $db->findAll();;
 }
 
 // Get the number of items per status
