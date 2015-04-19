@@ -78,6 +78,21 @@ function get_tag_id($title)
 }
 
 /**
+ * Get all feed ids assigned to tag
+ *
+ * @param type $tag_id
+ * @return array
+ */
+function get_feeds_by_tag($tag_id)
+{
+    // TODO: does it belong to Model\Tag?
+    return Database::get('db')
+            ->table('feed_tag')
+            ->eq('tag_id', $tag_id)
+            ->findAllByColumn('feed_id');
+}
+
+/**
  * Add tag to the Database
  *
  * Returns either the id of the new tag or the id of an existing tag with the

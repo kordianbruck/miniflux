@@ -15,11 +15,33 @@ Router\get_action('unread', function() {
     $order = Request\param('order', 'updated');
     $direction = Request\param('direction', Model\Config\get('items_sorting_direction'));
     $offset = Request\int_param('offset', 0);
-    $items = Model\Item\get_all_by_status('unread', $offset, Model\Config\get('items_per_page'), $order, $direction);
-    $nb_items = Model\Item\count_by_status('unread');
+    $group_id = Request\int_param('group_id', null);
+    $feed_id = Request\int_param('feed_id', null);
 
-    if ($nb_items === 0) {
+    // feed_id and group_id can be present at the same time, if a feed of a
+    // group is viewed. Show only items of this feed instead of the whole group.
+    if (!is_null($feed_id)) {
+        $feed_ids = array($feed_id);
+    }
+    elseif (!is_null($group_id)) {
+        $feed_ids = Model\Tag\get_feeds_by_tag($group_id);
+    }
+    else {
+        $feed_ids = null;
+    }
 
+    $items = Model\Item\get_all_by_status(
+        'unread',
+        $feed_ids,
+        $offset,
+        Model\Config\get('items_per_page'),
+        $order,
+        $direction
+    );
+    $nb_items = Model\Item\count_by_status('unread', $feed_ids);
+    $nb_unread_items = Model\Item\count_by_status('unread');
+
+    if ($nb_unread_items === 0) {
         $action = Model\Config\get('redirect_nothing_to_read');
         Response\redirect('?action='.$action.'&nothing_to_read=1');
     }
@@ -30,9 +52,11 @@ Router\get_action('unread', function() {
         'order' => $order,
         'direction' => $direction,
         'display_mode' => Model\Config\get('items_display_mode'),
+        'feed_id' => $feed_id,
+        'group_id' => $group_id,
         'items' => $items,
         'nb_items' => $nb_items,
-        'nb_unread_items' => $nb_items,
+        'nb_unread_items' => $nb_unread_items,
         'offset' => $offset,
         'items_per_page' => Model\Config\get('items_per_page'),
         'title' => 'Miniflux ('.$nb_items.')',
@@ -158,11 +182,27 @@ Router\post_action('mark-item-unread', function() {
     Response\json(array('Ok'));
 });
 
-// Mark all unread items as read
+// Mark unread items as read
 Router\get_action('mark-all-read', function() {
 
-    Model\Item\mark_all_as_read();
-    Response\redirect('?action=unread');
+    $group_id = Request\int_param('group_id', null);
+    $feed_id = Request\int_param('feed_id', null);
+
+    // feed_id and group_id can be present at the same time, if a feed of a
+    // group is viewed. Mark only items of this feed as read instead of the
+    // whole group.
+    if (!is_null($feed_id)) {
+        Model\Item\mark_feed_as_read($feed_id);
+        Response\redirect('?action=unread&group_id='.$group_id.'&feed_id='.$feed_id);
+    }
+    elseif (!is_null($group_id)) {
+        Model\Item\mark_group_as_read($group_id);
+        Response\redirect('?action=unread&group_id='.$group_id);
+    }
+    else {
+        Model\Item\mark_all_as_read();
+        Response\redirect('?action=unread');
+    }
 });
 
 // Mark all unread items as read for a specific feed
