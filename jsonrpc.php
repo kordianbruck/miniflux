@@ -114,7 +114,7 @@ $server->register('item.bookmark.delete', function ($item_id) {
 
 // Get all unread items
 $server->register('item.list_unread', function ($offset = null, $limit = null) {
-
+    
     return Model\Item\get_all_by_status('unread', null, $offset, $limit);
 });
 

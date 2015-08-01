@@ -3,7 +3,6 @@
 use PicoFarad\Router;
 use PicoFarad\Response;
 use PicoFarad\Request;
-use PicoFarad\Session;
 use PicoFarad\Template;
 
 // Display unread items
@@ -90,13 +89,13 @@ Router\get_action('show', function() {
             break;
     }
 
-    $image_proxy = Model\Config\get('image_proxy');
+    $image_proxy = (bool) Model\Config\get('image_proxy');
 
     // add the image proxy if requested and required
-    $item['content'] = Model\Proxy\addProxyToTags($item['content'], $item['url'], $image_proxy, $feed['cloak_referrer']);
+    $item['content'] = Model\Proxy\rewrite_html($item['content'], $item['url'], $image_proxy, $feed['cloak_referrer']);
 
     if ($image_proxy && strpos($item['enclosure_type'], 'image') === 0) {
-        $item['enclosure'] = Model\Proxy\addProxyToLink($item['enclosure']);
+        $item['enclosure'] = Model\Proxy\rewrite_link($item['enclosure']);
     }
 
     Response\html(Template\layout('show_item', array(
@@ -145,20 +144,9 @@ Router\post_action('download-item', function() {
     $feed = Model\Feed\get($item['feed_id']);
 
     $download = Model\Item\download_content_id($id);
-    $download['content'] = Model\Proxy\addProxyToTags($download['content'], $item['url'], Model\Config\get('image_proxy'), $feed['cloak_referrer']);
+    $download['content'] = Model\Proxy\rewrite_html($download['content'], $item['url'], Model\Config\get('image_proxy'), $feed['cloak_referrer']);
 
     Response\json($download);
-});
-
-// Ajax call change item status
-Router\post_action('change-item-status', function() {
-
-    $id = Request\param('id');
-
-    Response\json(array(
-        'item_id' => $id,
-        'status' => Model\Item\switch_status($id)
-    ));
 });
 
 // Ajax call to mark item read

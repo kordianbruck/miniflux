@@ -7,8 +7,7 @@ use Model\Config;
 use Model\Tag;
 use PicoDb\Database;
 use PicoFeed\Logging\Logger;
-use PicoFeed\Client\Grabber;
-use PicoFeed\Filter\Filter;
+use PicoFeed\Scraper\Scraper;
 
 // Get all items without filtering
 function get_all()
@@ -330,37 +329,6 @@ function set_bookmark_value($id, $value)
         ->save(array('bookmark' => $value));
 }
 
-// Swap item status read <-> unread
-function switch_status($id)
-{
-    $item = Database::get('db')
-        ->table('items')
-        ->columns('status')
-        ->eq('id', $id)
-        ->findOne();
-
-    if ($item['status'] == 'unread') {
-
-        Database::get('db')
-            ->table('items')
-            ->eq('id', $id)
-            ->save(array('status' => 'read'));
-
-        return 'read';
-    }
-    else {
-
-        Database::get('db')
-            ->table('items')
-            ->eq('id', $id)
-            ->save(array('status' => 'unread'));
-
-        return 'unread';
-    }
-
-    return '';
-}
-
 // Mark all unread items as read
 function mark_all_as_read()
 {
@@ -593,12 +561,12 @@ function download_content_url($url)
 {
     $content = '';
 
-    $grabber = new Grabber($url);
-    $grabber->setConfig(Config\get_reader_config());
-    $grabber->download();
+    $grabber = new Scraper(Config\get_reader_config());
+    $grabber->setUrl($url);
+    $grabber->execute();
 
-    if ($grabber->parse()) {
-        $content = $grabber->getFilteredcontent();
+    if ($grabber->hasRelevantContent()) {
+        $content = $grabber->getFilteredContent();
     }
 
     return $content;

@@ -4,6 +4,7 @@ namespace PicoFeed\Filter;
 use PHPUnit_Framework_TestCase;
 
 use PicoFeed\Client\Url;
+use PicoFeed\Config\Config;
 
 
 class AttributeFilterTest extends PHPUnit_Framework_TestCase
@@ -128,6 +129,24 @@ class AttributeFilterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array('src' => 'https://www.youtube.com/test'), $filter->filter('iframe', array('src' => '//www.youtube.com/test')));
     }
 
+    public function testRemoveYouTubeAutoplay()
+    {
+        $filter = new Attribute(new Url('http://google.com'));
+        $urls = array(
+            'https://www.youtube.com/something/?autoplay=1' => 'https://www.youtube.com/something/?autoplay=0',
+            'https://www.youtube.com/something/?test=s&autoplay=1&a=2' => 'https://www.youtube.com/something/?test=s&autoplay=0&a=2',
+            'https://www.youtube.com/something/?test=s' => 'https://www.youtube.com/something/?test=s',
+            'https://youtube.com/something/?autoplay=1' => 'https://youtube.com/something/?autoplay=0',
+            'https://youtube.com/something/?test=s&autoplay=1&a=2' => 'https://youtube.com/something/?test=s&autoplay=0&a=2',
+            'https://youtube.com/something/?test=s' => 'https://youtube.com/something/?test=s',
+        );
+
+        foreach ($urls as $before => $after) {
+            $filter->removeYouTubeAutoplay('iframe', 'src', $before);
+            $this->assertEquals($after, $before);
+        }
+    }
+
     public function testFilterBlacklistAttribute()
     {
         $filter = new Attribute(new Url('http://google.com'));
@@ -171,5 +190,135 @@ class AttributeFilterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('title="A &amp; B"', $filter->toHtml(array('title' => 'A & B')));
         $this->assertEquals('title="&quot;a&quot;"', $filter->toHtml(array('title' => '"a"')));
         $this->assertEquals('title="ç" alt="b"', $filter->toHtml(array('title' => 'ç', 'alt' => 'b')));
+    }
+
+    public function testNoImageProxySet()
+    {
+        $f = Filter::html('<p>Image <img src="/image.png" alt="My Image"/></p>', 'http://foo');
+
+        $this->assertEquals(
+            '<p>Image <img src="http://foo/image.png" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyWithHTTPLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+
+        $f = Filter::html('<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://myproxy/?url='.rawurlencode('http://localhost/image.png').'" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyWithHTTPSLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+
+        $f = Filter::html('<p>Image <img src="https://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://myproxy/?url='.rawurlencode('https://localhost/image.png').'" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyLimitedToUnknownProtocol()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+        $config->setFilterImageProxyProtocol('tripleX');
+
+        $f = Filter::html('<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyLimitedToHTTPwithHTTPLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+        $config->setFilterImageProxyProtocol('http');
+
+        $f = Filter::html('<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://myproxy/?url='.rawurlencode('http://localhost/image.png').'" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyLimitedToHTTPwithHTTPSLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+        $config->setFilterImageProxyProtocol('http');
+
+        $f = Filter::html('<p>Image <img src="https://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="https://localhost/image.png" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyLimitedToHTTPSwithHTTPLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+        $config->setFilterImageProxyProtocol('https');
+
+        $f = Filter::html('<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://localhost/image.png" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testImageProxyLimitedToHTTPSwithHTTPSLink()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyUrl('http://myproxy/?url=%s');
+        $config->setFilterImageProxyProtocol('https');
+
+        $f = Filter::html('<p>Image <img src="https://localhost/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="http://myproxy/?url='.rawurlencode('https://localhost/image.png').'" alt="My Image"/></p>',
+            $f->execute()
+        );
+    }
+
+    public function testsetFilterImageProxyCallback()
+    {
+        $config = new Config;
+        $config->setFilterImageProxyCallback(function ($image_url) {
+            $key = hash_hmac('sha1', $image_url, 'secret');
+            return 'https://mypublicproxy/'.$key.'/'.rawurlencode($image_url);
+        });
+
+        $f = Filter::html('<p>Image <img src="/image.png" alt="My Image"/></p>', 'http://foo');
+        $f->setConfig($config);
+
+        $this->assertEquals(
+            '<p>Image <img src="https://mypublicproxy/4924964043f3119b3cf2b07b1922d491bcc20092/'.rawurlencode('http://foo/image.png').'" alt="My Image"/></p>',
+            $f->execute()
+        );
     }
 }

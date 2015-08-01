@@ -24,7 +24,7 @@ Features
 - Content grabber: download from the original website the full content
 - Enclosure detection
 - RTL languages support
-- License: Unlicense <http://unlicense.org/>
+- License: MIT
 
 Requirements
 ------------
@@ -38,7 +38,7 @@ Requirements
 Authors
 -------
 
-- Original author: [Frédéric Guillot](http://fredericguillot.com/)
+- Original author: Frédéric Guillot
 - Major Contributors:
     - [Bernhard Posselt](https://github.com/Raydiation)
     - [David Pennington](https://github.com/Xeoncross)
@@ -47,7 +47,6 @@ Authors
 Real world usage
 ----------------
 
-- [AnythingNew](http://anythingnew.co)
 - [Miniflux](http://miniflux.net)
 - [Owncloud News](https://github.com/owncloud/news)
 

@@ -3,11 +3,11 @@
 namespace PicoFeed\Parser;
 
 use SimpleXMLElement;
+use PicoFeed\Client\Url;
 use PicoFeed\Encoding\Encoding;
 use PicoFeed\Filter\Filter;
 use PicoFeed\Logging\Logger;
-use PicoFeed\Client\Url;
-use PicoFeed\Client\Grabber;
+use PicoFeed\Scraper\Scraper;
 
 /**
  * Base parser class
@@ -58,12 +58,20 @@ abstract class Parser
     protected $fallback_url = '';
 
     /**
-     * XML namespaces
+     * XML namespaces supported by parser
      *
      * @access protected
      * @var array
      */
     protected $namespaces = array();
+
+    /**
+     * XML namespaces used in document
+     *
+     * @access protected
+     * @var array
+     */
+    protected $used_namespaces = array();
 
     /**
      * Enable the content filtering
@@ -80,6 +88,14 @@ abstract class Parser
      * @var bool
      */
     private $enable_grabber = false;
+
+    /**
+     * Enable the content grabber on all pages
+     *
+     * @access private
+     * @var bool
+     */
+    private $grabber_needs_rule_file = false;
 
     /**
      * Ignore those urls for the content scraper
@@ -109,9 +125,6 @@ abstract class Parser
         // Encode everything in UTF-8
         Logger::setMessage(get_called_class().': HTTP Encoding "'.$http_encoding.'" ; XML Encoding "'.$xml_encoding.'"');
         $this->content = Encoding::convert($this->content, $xml_encoding ?: $http_encoding);
-
-        // Workarounds
-        $this->content = Filter::normalizeData($this->content);
     }
 
     /**
@@ -127,12 +140,19 @@ abstract class Parser
         $xml = XmlParser::getSimpleXml($this->content);
 
         if ($xml === false) {
-            Logger::setMessage(get_called_class().': XML parsing error');
-            Logger::setMessage(XmlParser::getErrors());
-            throw new MalformedXmlException('XML parsing error');
+            Logger::setMessage(get_called_class().': Applying XML workarounds');
+            $this->content = Filter::normalizeData($this->content);
+            $xml = XmlParser::getSimpleXml($this->content);
+
+            if ($xml === false) {
+                Logger::setMessage(get_called_class().': XML parsing error');
+                Logger::setMessage(XmlParser::getErrors());
+                throw new MalformedXmlException('XML parsing error');
+            }
         }
 
-        $this->namespaces = $xml->getNamespaces(true);
+        $this->used_namespaces = $xml->getNamespaces(true);
+        $xml = $this->registerSupportedNamespaces($xml);
 
         $feed = new Feed;
 
@@ -152,9 +172,11 @@ abstract class Parser
 
         foreach ($this->getItemsTree($xml) as $entry) {
 
+            $entry = $this->registerSupportedNamespaces($entry);
+
             $item = new Item;
             $item->xml = $entry;
-            $item->namespaces = $this->namespaces;
+            $item->namespaces = $this->used_namespaces;
 
             $this->findItemAuthor($xml, $entry, $item);
 
@@ -237,11 +259,16 @@ abstract class Parser
     {
         if ($this->enable_grabber && ! in_array($item->getUrl(), $this->grabber_ignore_urls)) {
 
-            $grabber = new Grabber($item->getUrl());
-            $grabber->setConfig($this->config);
-            $grabber->download();
+            $grabber = new Scraper($this->config);
+            $grabber->setUrl($item->getUrl());
 
-            if ($grabber->parse()) {
+            if ($this->grabber_needs_rule_file) {
+                $grabber->disableCandidateParser();
+            }
+
+            $grabber->execute();
+
+            if ($grabber->hasRelevantContent()) {
                 $item->content = $grabber->getFilteredContent();
             }
         }
@@ -270,7 +297,6 @@ abstract class Parser
      * Generate a unique id for an entry (hash all arguments)
      *
      * @access public
-     * @param  string  $args  Pieces of data to hash
      * @return string
      */
     public function generateId()
@@ -383,11 +409,14 @@ abstract class Parser
      * Enable the content grabber
      *
      * @access public
+     * @param bool $needs_rule_file true if only pages with rule files should be
+     * scraped
      * @return \PicoFeed\Parser\Parser
      */
-    public function enableContentGrabber()
+    public function enableContentGrabber($needs_rule_file = false)
     {
         $this->enable_grabber = true;
+        $this->grabber_needs_rule_file = $needs_rule_file;
     }
 
     /**
@@ -400,6 +429,22 @@ abstract class Parser
     public function setGrabberIgnoreUrls(array $urls)
     {
         $this->grabber_ignore_urls = $urls;
+    }
+
+    /**
+     * Register all supported namespaces to be used within an xpath query
+     *
+     * @access public
+     * @param  SimpleXMLElement          $xml     Feed xml
+     * @return SimpleXMLElement
+     */
+    public function registerSupportedNamespaces(SimpleXMLElement $xml)
+    {
+        foreach ($this->namespaces as $prefix => $ns) {
+            $xml->registerXPathNamespace($prefix, $ns);
+        }
+
+        return $xml;
     }
 
     /**
