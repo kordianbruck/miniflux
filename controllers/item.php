@@ -59,7 +59,8 @@ Router\get_action('unread', function() {
         'offset' => $offset,
         'items_per_page' => Model\Config\get('items_per_page'),
         'title' => 'Miniflux ('.$nb_items.')',
-        'menu' => 'unread'
+        'menu' => 'unread',
+        'tags' => Model\Tag\get_all()
     )));
 });
 
