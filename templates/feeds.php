@@ -31,7 +31,7 @@
                     <span title="<?= t('Subscription disabled') ?>">✖</span>
                 <?php endif ?>
 
-                <?= Helper\favicon($favicons, $feed['id']) ?>
+                <?= Helper\favicon($feed['id']) ?>
 
                 <a href="?action=feed-items&amp;feed_id=<?= $feed['id'] ?>" title="<?= t('Show only this subscription') ?>"><?= Helper\escape($feed['title']) ?></a>
                 &lrm;<span class="items-count"><?= $feed['items_unread'] .'/' . $feed['items_total'] ?></span>

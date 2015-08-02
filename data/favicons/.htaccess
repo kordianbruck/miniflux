@@ -1,0 +1,4 @@
+Allow from all
+
+#Enable caching for a years time
+Header set Cache-Control "max-age=29030400, public"

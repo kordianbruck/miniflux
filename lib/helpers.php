@@ -29,10 +29,10 @@ function parse_app_version($refnames, $commithash)
     return $version;
 }
 
-function favicon(array $favicons, $feed_id)
+function favicon($feed_id)
 {
-    if (! empty($favicons[$feed_id])) {
-        return '<img src="'.$favicons[$feed_id].'" class="favicon"/>';
+    if (!empty($feed_id)) {
+        return '<img src="'.FAVICON_DIRECTORY_PUBLIC.$feed_id.FAVICON_EXT.'" class="favicon"/>';
     }
 
     return '';

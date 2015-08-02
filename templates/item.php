@@ -9,7 +9,7 @@
     <h2 <?= Helper\is_rtl($item) ? 'dir="rtl"' : 'dir="ltr"' ?>>
         <span class="bookmark-icon"></span>
         <span class="read-icon"></span>
-        <?= Helper\favicon($favicons, $item['feed_id']) ?>
+        <?= Helper\favicon($item['feed_id']) ?>
         <a
             href="?action=show&amp;menu=<?= $menu ?>&amp;id=<?= $item['id'] ?>"
             class="show"

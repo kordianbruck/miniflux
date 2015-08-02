@@ -6,6 +6,12 @@ define('HTTP_TIMEOUT', '20');
 // DATA_DIRECTORY => default is data (writable directory)
 define('DATA_DIRECTORY', __DIR__.'/data');
 
+// FAVICON_DIRECTORY => where your favicons will be saved to (writable directory)
+define('FAVICON_DIRECTORY', DATA_DIRECTORY.'/favicons');
+
+// FAVICON_DIRECTORY_PUBLIC => public path to the favicon directory which is accessable via browser
+define('FAVICON_DIRECTORY_PUBLIC', 'data'.DIRECTORY_SEPARATOR.'favicons'.DIRECTORY_SEPARATOR);
+
 // DB_FILENAME => default value is db.sqlite (default database filename)
 define('DB_FILENAME', 'db.sqlite');
 

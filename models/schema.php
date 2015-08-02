@@ -5,7 +5,12 @@ namespace Schema;
 use PDO;
 use Model\Config;
 
-const VERSION = 40;
+const VERSION = 41;
+
+function version_41($pdo)
+{
+    $pdo->exec('DROP TABLE favicons');
+}
 
 function version_40($pdo)
 {

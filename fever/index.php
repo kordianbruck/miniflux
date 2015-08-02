@@ -124,19 +124,12 @@ route('favicons', function() {
 
     if ($response['auth']) {
 
-        $favicons = Database::get('db')
-            ->table('favicons')
-            ->columns(
-                'feed_id',
-                'icon'
-            )
-            ->findAll();
-
+        $favicons = glob(FAVICON_DIRECTORY.DIRECTORY_SEPARATOR.'*'.FAVICON_EXT);
         $response['favicons'] = array();
         foreach ($favicons as $favicon) {
             $response['favicons'][] = array(
-                'id' => (int) $favicon['feed_id'],
-                'data' => $favicon['icon']
+                'id' => (int) basename($favicon, FAVICON_EXT),
+                'data' => 'data:image/'.pathinfo($favicon, PATHINFO_EXTENSION).';base64,'.base64_encode(file_get_contents($favicon))
             );
         }
     }

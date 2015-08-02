@@ -20,13 +20,7 @@ const LIMIT_ALL = -1;
 // Store the favicon
 function store_favicon($feed_id, $link, $icon)
 {
-    return Database::get('db')
-            ->table('favicons')
-            ->save(array(
-                'feed_id' => $feed_id,
-                'link' => $link,
-                'icon' => $icon,
-            ));
+    return file_put_contents(FAVICON_DIRECTORY.DIRECTORY_SEPARATOR.$feed_id.FAVICON_EXT, $icon);
 }
 
 // Download favicon
@@ -36,7 +30,7 @@ function fetch_favicon($feed_id, $site_url, $icon_link)
         $favicon = new Favicon;
 
         $link = $favicon->find($site_url, $icon_link);
-        $icon = $favicon->getDataUri();
+        $icon = $favicon->getContent();
 
         if ($icon !== '') {
             store_favicon($feed_id, $link, $icon);
@@ -47,47 +41,7 @@ function fetch_favicon($feed_id, $site_url, $icon_link)
 // Return true if the feed have a favicon
 function has_favicon($feed_id)
 {
-    return Database::get('db')->table('favicons')->eq('feed_id', $feed_id)->count() === 1;
-}
-
-// Get favicons for those feeds
-function get_favicons(array $feed_ids)
-{
-    if (Config\get('favicons') == 0) {
-        return array();
-    }
-
-    $db = Database::get('db')
-            ->hashtable('favicons')
-            ->columnKey('feed_id')
-            ->columnValue('icon');
-
-    // pass $feeds_ids as argument list to hashtable::get(), use ... operator with php 5.6+
-    return call_user_func_array(array($db, 'get'), $feed_ids);
-}
-
-// Get all favicons for a list of items
-function get_item_favicons(array $items)
-{
-    $feed_ids = array();
-
-    foreach ($items as $item) {
-        $feed_ids[$item['feed_id']] = $item['feed_id'];
-    }
-
-    return get_favicons($feed_ids);
-}
-
-// Get all favicons
-function get_all_favicons()
-{
-    if (Config\get('favicons') == 0) {
-        return array();
-    }
-
-    return Database::get('db')
-            ->hashtable('favicons')
-            ->getAll('feed_id', 'icon');
+    return file_exists(FAVICON_DIRECTORY.DIRECTORY_SEPARATOR.$feed_id.FAVICON_EXT);
 }
 
 // Update feed information
