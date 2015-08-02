@@ -1,6 +1,7 @@
 Miniflux.Event = (function() {
 
     var queue = [];
+    var scrollTimeout = null;
 
     function isEventIgnored(e)
     {
@@ -233,6 +234,20 @@ Miniflux.Event = (function() {
                     Miniflux.App.Log('Need to update the unread counter with fresh values from the database');
                     Miniflux.Item.CheckForUpdates();
                 }
+            });
+        },
+        ListenScrollEvents: function() {
+            document.addEventListener('scroll', function() {
+                //Clear any old timeouts: reset the clock
+                if(scrollTimeout !== null){
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = null;
+                }
+
+                //Set the new timeout
+                scrollTimeout = setTimeout(function(){
+                    Miniflux.Item.ScrollReadCheck();
+                },2000);
             });
         }
     };

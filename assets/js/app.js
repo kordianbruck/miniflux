@@ -32,10 +32,14 @@ Miniflux.App = (function() {
                 else {
                     Miniflux.App.Log('Frontend updatecheck disabled');
                 }
+
+                if(response['scroll_marks_read'] === "1"){ //@todo add check if we are on unread page
+                    Miniflux.Event.ListenScrollEvents();
+                }
             };
 
             request.open("POST", "?action=get-config", true);
-            request.send(JSON.stringify(['frontend_updatecheck_interval']));
+            request.send(JSON.stringify(['frontend_updatecheck_interval','scroll_marks_read']));
         }
     };
 

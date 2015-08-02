@@ -382,6 +382,21 @@ Miniflux.Item = (function() {
 
             request.open("POST", "?action=latest-feeds-items", true);
             request.send();
+        },
+        ScrollReadCheck: function(){
+            //Get all current articles
+            var items = document.getElementsByTagName("article");
+
+            for (i = 0; i < items.length; i++) {
+
+                //Check each item if it is still inside the window
+                var rect = items[i].getBoundingClientRect();
+                if(rect.top < 0 ){
+                    //Mark as read if item has scrollen out the top
+                    markAsRead(items[i]);
+                }
+
+            }
         }
     };
 
