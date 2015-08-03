@@ -94,7 +94,6 @@ function get_all_favicons()
 // Update feed information
 function update(array $values)
 {
-    // TODO: does it work?
     Database::get('db')->startTransaction();
 
     $result = Database::get('db')
