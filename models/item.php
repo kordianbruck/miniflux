@@ -348,31 +348,6 @@ function mark_all_as_removed()
         ->save(array('status' => 'removed', 'content' => ''));
 }
 
-// Mark all read items of a feed to removed
-function mark_feed_as_removed($feed_id)
-{
-    return Database::get('db')
-        ->table('items')
-        ->eq('status', 'read')
-        ->eq('bookmark', 0)
-        ->eq('feed_id', $feed_id)
-        ->save(array('status' => 'removed', 'content' => ''));
-}
-
-// Mark all read items of a group to removed
-function mark_group_as_removed($group_id)
-{
-    // workaround for missing update with join
-    $feed_ids = Tag\get_feeds_by_tag($group_id);
-
-    return Database::get('db')
-        ->table('items')
-        ->eq('status', 'read')
-        ->eq('bookmark', 0)
-        ->in('feed_id', $feed_ids)
-        ->save(array('status' => 'removed', 'content' => ''));
-}
-
 // Mark all items of a feed as read
 function mark_feed_as_read($feed_id)
 {

@@ -11,7 +11,6 @@ use PicoDb\Database;
  */
 function get_all()
 {
-    // TODO: Who is responsible for sorting the data in MVC?
     return Database::get('db')
             ->table('tag')
             ->orderBy('title')
@@ -85,7 +84,6 @@ function get_tag_id($title)
  */
 function get_feeds_by_tag($tag_id)
 {
-    // TODO: does it belong to Model\Tag?
     return Database::get('db')
             ->table('feed_tag')
             ->eq('tag_id', $tag_id)
