@@ -2,13 +2,18 @@
 
     <div class="page-header">
         <h2><?= t('Unread') ?><span id="page-counter"><?= isset($nb_items) ? $nb_items : '' ?></span></h2>
-        <ul id="taglist">
-            <?php foreach ($tags as $tag): ?>
-            <li>
-                <a href="?action=unread&group_id=<?=$tag['id']?>" class="tag"><?=$tag['title']?></a>
-            </li>
-            <?php endforeach ?>
-        </ul>
+        <?php if (!empty($tags)): ?>
+        <nav>
+            <ul id="taglist">
+                <?php foreach ($tags as $tag): ?>
+                <li  <?= $tag['id'] == $group_id ? 'class="active"' : '' ?>>
+                    <a href="?action=unread&group_id=<?=$tag['id']?>"><?=$tag['title']?></a>
+                </li>
+                <?php endforeach ?>
+            </ul>
+        </nav>
+        <?php endif ?>
+
         <ul>
             <li>
                 <a href="?action=unread<?= is_null($group_id) ? '' : '&amp;group_id='.$group_id ?>&amp;order=updated&amp;direction=<?= $direction == 'asc' ? 'desc' : 'asc' ?>"><?= tne('sort by date %s(%s)%s', '<span class="hide-mobile">',$direction == 'desc' ? t('older first') : t('most recent first'), '</span>') ?></a>

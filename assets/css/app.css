@@ -275,6 +275,10 @@ ul#taglist {
     float: left;
 }
 
+ul#taglist li {
+    margin-left: 0px;
+}
+
 /* alerts */
 .alert, .panel {
     padding: 8px 35px 8px 14px;
